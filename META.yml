@@ -1,0 +1,30 @@
+---
+name: CPAN-Mini-Inject-Remote
+version: 0.01
+author:
+  - 'Christopher Mckay <potatohead@potatolan.com>'
+abstract: Inject into your CPAN mirror from over here
+license: perl
+resources:
+  license: http://dev.perl.org/licenses/
+build_requires:
+  Test::More: 0
+requires:
+  Config::Any: 0
+  File::Spec: 0
+  Getopt::Long: 0
+  HTTP::Request: 0
+  HTTP::Request::Common: 0
+  LWP::UserAgent: 0
+  Params::Validate: 0
+  Pod::Usage: 0
+configure_requires:
+  Module::Build: 0.35
+provides:
+  CPAN::Mini::Inject::Remote:
+    file: lib/CPAN/Mini/Inject/Remote.pm
+    version: 0.01
+generated_by: Module::Build version 0.35
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4

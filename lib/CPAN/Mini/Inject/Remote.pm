@@ -7,6 +7,8 @@ use Params::Validate qw/validate
 use File::Spec;
 use Config::Any;
 use LWP::UserAgent;
+use HTTP::Request;
+use HTTP::Request::Common;
 use Carp;
 
 =head1 NAME
@@ -80,7 +82,7 @@ sub _initialize {
         {
             $args{config_file} = $self->_find_config();
         }
-        elsif (not -r $file
+        elsif (not -r $args{config_file})
         {
             croak "Supplied config file is not readable"; 
         }
@@ -118,6 +120,9 @@ sub _initialize {
 sub _find_config {
     my $self = shift;    
     my %args = validate(@_,
+        {
+
+        }
     );
 
     my @config_locations = (
@@ -137,7 +142,7 @@ sub _find_config {
         ),
     );
 
-    for my $file ( @files ) {
+    for my $file ( @config_locations) {
         next unless defined $file;
         next unless -r $file;
 
@@ -207,7 +212,7 @@ sub add {
     my $ua = $self->_useragent();
 
     my $response = $ua->request(PUT $self->{remote_server}.'/add',
-        Content_Type => 'form-data'
+        Content_Type => 'form-data',
         Content => [
             module => $args{module_name},
             authorid => $args{author_id},

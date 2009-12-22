@@ -1,8 +1,13 @@
+bin/mcpani_remote
 Build.PL
 Changes
-MANIFEST
-README
+ignore.txt
 lib/CPAN/Mini/Inject/Remote.pm
+Makefile.PL
+MANIFEST
+META.yml
+README
 t/00-load.t
+t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
