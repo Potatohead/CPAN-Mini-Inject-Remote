@@ -295,8 +295,9 @@ Please report any bugs or feature requests to C<bug-cpan-mini-inject-remote at r
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CPAN-Mini-Inject-Remote>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
+=head1 TODO
 
-
+Fix up error messages, they currently contain $response dumps
 
 =head1 SUPPORT
 
