@@ -5,10 +5,11 @@ use warnings;
 use Params::Validate qw/validate
                         SCALAR/;
 use File::Spec;
-use Config::Any;
+use YAML::Any qw/LoadFile/;
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Request::Common;
+use Data::Dumper;
 use Carp;
 
 =head1 NAME
@@ -87,17 +88,17 @@ sub _initialize {
             croak "Supplied config file is not readable"; 
         }
 
-        my $config = Config::Any->load_files(
-            {files => [$args{config_file}]},
-            flatten_to_hash => 1
-        );
+        my $config = LoadFile($args{config_file}); 
 
-        $self->{remote_server} = $config->{$args{config_file}}->{remote_server};
+        $self->{remote_server} = $config->{remote_server};
     }
     else
     {
         $self->{remote_server} = $args{remote_server};
     }
+
+    # get rid of any trailing slash as it will break things
+    $self->{remote_server} =~ s/\/$//;
 
 } # end of method _initialize
 
@@ -211,7 +212,7 @@ sub add {
 
     my $ua = $self->_useragent();
 
-    my $response = $ua->request(PUT $self->{remote_server}.'/add',
+    my $response = $ua->request(POST $self->{remote_server}.'/add',
         Content_Type => 'form-data',
         Content => [
             module => $args{module_name},
@@ -223,7 +224,7 @@ sub add {
 
     if (not $response->is_success())
     {
-        croak "Add failed. $response";
+        croak 'Add failed. ' . Dumper($response);
     }
 
     return;
@@ -250,7 +251,7 @@ sub update {
 
     if (not $response->is_success())
     {
-        croak "Update failed. $response";
+        croak 'Update failed. ' . Dumper($response);
     }
 
     return;
@@ -277,7 +278,7 @@ sub inject {
 
     if (not $response->is_success())
     {
-        croak "Inject failed. $response";
+        croak 'Inject failed. ' . Dumper($response);
     }
 
     return;

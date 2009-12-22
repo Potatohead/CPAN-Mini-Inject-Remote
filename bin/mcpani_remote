@@ -98,6 +98,7 @@ our $VERSION = '0.01';
 use Carp;
 use Getopt::Long;
 use Pod::Usage;
+use CPAN::Mini::Inject::Remote;
 
 my ($help, $man);
 
@@ -164,7 +165,7 @@ if ($options{action}->{add})
         module_name => $options{add}->{module},
         author_id => $options{add}->{authorid},
         version => $options{add}->{version},
-        file => $options{add}->{file},
+        file_name => $options{add}->{file},
     );
 }
 
