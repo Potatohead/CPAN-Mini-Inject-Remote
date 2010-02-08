@@ -5,7 +5,7 @@ use warnings;
 
 =head1 NAME
 
-mcpani_remote.pl - short desc
+mcpani_remote - A command line tool to talk to a CPAN::Mini::Inject::Server
 
 =head1 SYNOPSIS
 

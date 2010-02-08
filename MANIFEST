@@ -5,6 +5,8 @@ ignore.txt
 lib/CPAN/Mini/Inject/Remote.pm
 Makefile.PL
 MANIFEST
+MANIFEST.bak
+MANIFEST.SKIP
 META.yml
 README
 t/00-load.t
