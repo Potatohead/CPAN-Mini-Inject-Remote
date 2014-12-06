@@ -1,3 +1,5 @@
+# -*- indent-tabs-mode: nil -*-
+
 use strict;
 use warnings;
 use Module::Build;
@@ -19,6 +21,8 @@ my $builder = Module::Build->new(
         'LWP::UserAgent' => 0,
         'HTTP::Request' => 0,
         'HTTP::Request::Common' => 0,
+        'Archive::Tar' => 0,
+        'CPAN::Meta' => 0,
     },
     add_to_cleanup      => [ 'CPAN-Mini-Inject-Remote-*' ],
     create_makefile_pl => 'traditional',

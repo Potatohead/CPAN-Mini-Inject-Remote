@@ -1,5 +1,8 @@
 Revision history for CPAN-Mini-Inject-Remote
 
+0.03	2014-12-06/19:00
+        adds ssl_opts
+	guesses -module and -modversion from the file
 0.02    2010-02-08/11:44
         Corrected some documentation
 0.01    Date/time

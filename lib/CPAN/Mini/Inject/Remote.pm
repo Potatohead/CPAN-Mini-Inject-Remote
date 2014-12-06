@@ -1,3 +1,5 @@
+# -*- indent-tabs-mode: nil -*-
+
 package CPAN::Mini::Inject::Remote;
 
 use strict;
@@ -18,11 +20,11 @@ CPAN::Mini::Inject::Remote - Inject into your CPAN mirror from over here
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 
 =head1 SYNOPSIS
@@ -77,20 +79,20 @@ sub _initialize {
         }
     );
 
+    if (not $args{config_file})
+    {
+	$args{config_file} = $self->_find_config();
+    }
+    elsif (not -r $args{config_file})
+    {
+	croak "Supplied config file is not readable";
+    }
+
+    my $config = LoadFile($args{config_file});
+
     if (not $args{remote_server})
     {
-        if (not $args{config_file})
-        {
-            $args{config_file} = $self->_find_config();
-        }
-        elsif (not -r $args{config_file})
-        {
-            croak "Supplied config file is not readable"; 
-        }
-
-        my $config = LoadFile($args{config_file}); 
-
-        $self->{remote_server} = $config->{remote_server};
+	$self->{remote_server} = $config->{remote_server};
     }
     else
     {
@@ -99,6 +101,25 @@ sub _initialize {
 
     # get rid of any trailing slash as it will break things
     $self->{remote_server} =~ s/\/$//;
+
+    my @ssl_opt = qw/SSL_ca_file SSL_cert_file SSL_key_file verify_hostnames/;
+    for (@ssl_opt)
+    {
+        next unless my $c = $config->{$_};
+        if ($c =~ s/^\s*#!//)
+        {
+            my $output = eval { `$c` };
+            $self->{ssl_opts}{$_} = $output unless $?;
+        }
+        elsif ($c =~ /^~/)
+        {
+            $self->{ssl_opts}{$_} = (glob $c)[0];
+        }
+        else
+        {
+            $self->{ssl_opts}{$_} = $c;
+        }
+    }
 
 } # end of method _initialize
 
@@ -173,6 +194,11 @@ sub _useragent {
     if (not $self->{useragent})
     {
         $self->{useragent} = LWP::UserAgent->new;
+
+        if ($self->{remote_server} =~ /^https:/ && $self->{ssl_opts})
+        {
+            $self->{useragent}->ssl_opts(%{$self->{ssl_opts}});
+        }
     }
 
     return $self->{useragent};
