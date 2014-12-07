@@ -9,7 +9,7 @@ mcpani_remote - A command line tool to talk to a CPAN::Mini::Inject::Server
 
 =head1 SYNOPSIS
 
-mcpani_remote.pl [options]
+mcpani_remote [options]
 
 Commands:
 
@@ -89,11 +89,11 @@ perform its functionality
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use Carp;
 use Getopt::Long;
@@ -163,7 +163,7 @@ if (not (grep $options{action}->{$_}, qw/add update inject/)
 		'-author', $options{add}->{authorid} || 'DUMMY',
 		);
 	    warn "@mcpani\n" if $verbose;
-	    system @mcpani;
+	    exit 1 unless (system @mcpani) == 0;
 	    $inject++;
 	}
     }
@@ -211,22 +211,22 @@ my $cpan_mini = CPAN::Mini::Inject::Remote->new(
 
 if ($options{action}->{add})
 {
-    $cpan_mini->add(
+    exit 1 unless $cpan_mini->add(
         module_name => $options{add}->{module},
         author_id => $options{add}->{authorid},
         version => $options{add}->{version},
         file_name => $options{add}->{file},
-    );
+    )->is_success();
 }
 
 if ($options{action}->{inject})
 {
-    $cpan_mini->inject();
+    exit 1 unless $cpan_mini->inject()->is_success();
 }
 
 if ($options{action}->{update})
 {
-    $cpan_mini->update();
+    exit 1 unless $cpan_mini->update()->is_success();
 }
 
 =head1 AUTHOR
@@ -237,7 +237,7 @@ Christopher Mckay (cmckay), C<< <cmckay@iseek.com.au> >>
 
 You can find documentation for this module with the perldoc command.
 
-perldoc mcpani_remote.pl
+perldoc mcpani_remote
 
 
 =head1 ACKNOWLEDGEMENTS
@@ -252,5 +252,5 @@ This program is released under the following license: restrictive
 
 =cut
 
-# End of mcpani_remote.pl
+# End of mcpani_remote
 
