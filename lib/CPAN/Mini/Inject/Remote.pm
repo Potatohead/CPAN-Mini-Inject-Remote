@@ -20,11 +20,11 @@ CPAN::Mini::Inject::Remote - Inject into your CPAN mirror from over here
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 
 =head1 SYNOPSIS
@@ -109,7 +109,7 @@ sub _initialize {
         if ($c =~ s/^\s*#!//)
         {
             my $output = eval { `$c` };
-            $self->{ssl_opts}{$_} = $output unless $?;
+            $self->{ssl_opts}{$_} = $output if $? == 0;
         }
         elsif ($c =~ /^~/)
         {
@@ -250,10 +250,11 @@ sub add {
 
     if (not $response->is_success())
     {
-        croak 'Add failed. ' . Dumper($response);
+        #croak 'Add failed. ' . Dumper($response);
+        warn 'Add failed. ' . $response->status_line . "\n";
     }
 
-    return;
+    return $response;
 } # end of method add
 
 
@@ -277,10 +278,11 @@ sub update {
 
     if (not $response->is_success())
     {
-        croak 'Update failed. ' . Dumper($response);
+        #croak 'Update failed. ' . Dumper($response);
+        warn 'Update failed. ' . $response->status_line . "\n";
     }
 
-    return;
+    return $response;
 } # end of method update
 
 
@@ -304,10 +306,11 @@ sub inject {
 
     if (not $response->is_success())
     {
-        croak 'Inject failed. ' . Dumper($response);
+        #croak 'Inject failed. ' . Dumper($response);
+        warn 'Inject failed. ' . $response->status_line . "\n";
     }
 
-    return;
+    return $response;
 } # end of method inject
 
 
