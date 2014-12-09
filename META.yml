@@ -16,7 +16,7 @@ name: CPAN-Mini-Inject-Remote
 provides:
   CPAN::Mini::Inject::Remote:
     file: lib/CPAN/Mini/Inject/Remote.pm
-    version: '0.03'
+    version: '0.04'
 requires:
   Archive::Tar: '0'
   CPAN::Meta: '0'
@@ -30,4 +30,4 @@ requires:
   YAML::Any: '0'
 resources:
   license: http://dev.perl.org/licenses/
-version: '0.03'
+version: '0.04'
