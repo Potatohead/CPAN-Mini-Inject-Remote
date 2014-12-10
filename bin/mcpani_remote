@@ -1,4 +1,4 @@
-#!/usr/bin/perl 
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ mcpani_remote - A command line tool to talk to a CPAN::Mini::Inject::Server
 
 =head1 SYNOPSIS
 
-mcpani_remote.pl [options]
+mcpani_remote [options]
 
 Commands:
 
@@ -89,11 +89,11 @@ perform its functionality
 
 =head1 VERSION
 
-Version 0.01
+Version 0.03
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.03';
 
 use Carp;
 use Getopt::Long;
@@ -101,12 +101,14 @@ use Pod::Usage;
 use CPAN::Mini::Inject::Remote;
 
 my ($help, $man);
+my $verbose = 0;
 
 my %options;
 
 GetOptions(
     'help|?' => \$help,
     'man' => \$man,
+    'verbose+' => \$verbose,
     'remote_server=s' => \$options{remote_server},
     'add' => \($options{action}->{add}),
     'module=s' => \($options{add}->{module}),
@@ -119,6 +121,54 @@ GetOptions(
 
 pod2usage(1) if $help;
 pod2usage(-exitstatus => 0, -verbose => 2) if $man;
+
+use Archive::Tar;
+use CPAN::Meta;
+
+sub get_name_version {
+    my $file = shift;
+    (my $tar = Archive::Tar->new) or die "can't new Archive::Tar";
+    if ($tar->read($file, { filter => qr/META/ }))
+    {
+	my @list = $tar->list_files([qw(name)]);
+	for (grep /META/, @list)
+	{
+	    next unless my $string = $tar->get_content($_);
+	    print $string if $verbose > 1;
+	    next unless my $meta = CPAN::Meta->load_string($string);
+	    (my $scan_version = $meta->version) .= '(?:_\d+)?';
+	    my ($modversion) = $file =~ /($scan_version)/;
+	    (my $scan_name = $meta->name) =~ s{-}{[/-]}g;
+	    my ($modname) = map { /\b($scan_name)(\.\w+)?$/? $1 : () } @list;
+	    $modname =~ s/\//::/g;
+	    return ($modname, $modversion) if $modname && $modversion;
+	}
+    }
+}
+
+if (not (grep $options{action}->{$_}, qw/add update inject/)
+    and not $options{add}->{module}
+    and not $options{add}->{version}
+    and not $options{add}->{file})
+{
+    my $inject;
+    for (@ARGV)
+    {
+	if (my ($modname, $modversion) = get_name_version($_))
+	{
+	    $options{add}->{authorid} or warn "$0: authorid DUMMY\n";
+	    my @mcpani = (
+		$0, '-add', '-file', $_,
+		'-module', $modname, '-modversion', $modversion,
+		'-author', $options{add}->{authorid} || 'DUMMY',
+		);
+	    warn "@mcpani\n" if $verbose;
+	    exit 1 unless (system @mcpani) == 0;
+	    $inject++;
+	}
+    }
+    $options{action}->{inject} = $inject;
+}
 
 if (not ($options{action}->{add}
          or $options{action}->{update}
@@ -161,22 +211,22 @@ my $cpan_mini = CPAN::Mini::Inject::Remote->new(
 
 if ($options{action}->{add})
 {
-    $cpan_mini->add(
+    exit 1 unless $cpan_mini->add(
         module_name => $options{add}->{module},
         author_id => $options{add}->{authorid},
         version => $options{add}->{version},
         file_name => $options{add}->{file},
-    );
+    )->is_success();
 }
 
 if ($options{action}->{inject})
 {
-    $cpan_mini->inject();
+    exit 1 unless $cpan_mini->inject()->is_success();
 }
 
 if ($options{action}->{update})
 {
-    $cpan_mini->update();
+    exit 1 unless $cpan_mini->update()->is_success();
 }
 
 =head1 AUTHOR
@@ -187,7 +237,7 @@ Christopher Mckay (cmckay), C<< <cmckay@iseek.com.au> >>
 
 You can find documentation for this module with the perldoc command.
 
-perldoc mcpani_remote.pl
+perldoc mcpani_remote
 
 
 =head1 ACKNOWLEDGEMENTS
@@ -202,5 +252,5 @@ This program is released under the following license: restrictive
 
 =cut
 
-# End of mcpani_remote.pl
+# End of mcpani_remote
 
