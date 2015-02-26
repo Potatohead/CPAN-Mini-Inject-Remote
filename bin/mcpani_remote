@@ -122,7 +122,7 @@ GetOptions(
 pod2usage(1) if $help;
 pod2usage(-exitstatus => 0, -verbose => 2) if $man;
 
-use CPAN::DistnameInfo;
+use Dist::Metadata;
 
 if (not (grep $options{action}->{$_}, qw/add update inject/)
     and not $options{add}->{module}
@@ -132,18 +132,19 @@ if (not (grep $options{action}->{$_}, qw/add update inject/)
     my $inject;
     for (@ARGV)
     {
-	if (my $d = CPAN::DistnameInfo->new($_))
-	{
-	    $options{add}->{authorid} or warn "$0: authorid DUMMY\n";
-            (my $module = $d->dist) =~ s/-/::/g;
-	    my @mcpani = (
-		$0, '-add', '-file', $_,
-		'-module', $module, '-modversion', $d->version,
-		'-author', $options{add}->{authorid} || 'DUMMY',
-		);
-	    warn "@mcpani\n" if $verbose;
-	    exit 1 unless (system @mcpani) == 0;
-	    $inject++;
+        if (my $d = Dist::Metadata->new(file => $_)) {
+            my $p = $d->package_versions;
+            if (my ($module) = sort { length $a <=> length $b } keys %{$p}) {
+                $options{add}->{authorid} or warn "$0: authorid DUMMY\n";
+                my @mcpani = (
+                    $0, '-add', '-file', $_,
+                    '-module', $module, '-modversion', $p->{$module},
+                    '-author', $options{add}->{authorid} || 'DUMMY',
+                   );
+                warn "@mcpani\n" if $verbose;
+                exit 1 unless (system @mcpani) == 0;
+                $inject++;
+            }
 	}
     }
     $options{action}->{inject} = $inject;
