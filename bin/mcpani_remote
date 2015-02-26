@@ -135,9 +135,10 @@ if (not (grep $options{action}->{$_}, qw/add update inject/)
 	if (my $d = CPAN::DistnameInfo->new($_))
 	{
 	    $options{add}->{authorid} or warn "$0: authorid DUMMY\n";
+            (my $module = $d->dist) =~ s/-/::/g;
 	    my @mcpani = (
 		$0, '-add', '-file', $_,
-		'-module', $d->dist, '-modversion', $d->version,
+		'-module', $module, '-modversion', $d->version,
 		'-author', $options{add}->{authorid} || 'DUMMY',
 		);
 	    warn "@mcpani\n" if $verbose;
