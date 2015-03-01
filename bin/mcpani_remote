@@ -137,9 +137,9 @@ if (not (grep $options{action}->{$_}, qw/add update inject/)
             if (my ($module) = sort { length $a <=> length $b } keys %{$p}) {
                 $options{add}->{authorid} or warn "$0: authorid DUMMY\n";
                 my @mcpani = (
-                    $0, '-add', '-file', $_,
-                    '-module', $module, '-modversion', $p->{$module},
-                    '-author', $options{add}->{authorid} || 'DUMMY',
+                    $0, '--add', '--file', $_,
+                    '--module', $module, '--modversion', $p->{$module},
+                    '--authorid', $options{add}->{authorid} || 'DUMMY',
                    );
                 warn "@mcpani\n" if $verbose;
                 exit 1 unless (system @mcpani) == 0;

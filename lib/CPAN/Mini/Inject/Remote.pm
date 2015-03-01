@@ -13,6 +13,7 @@ use HTTP::Request;
 use HTTP::Request::Common;
 use Data::Dumper;
 use Carp;
+use Scalar::Util qw/blessed/;
 
 =head1 NAME
 
@@ -20,11 +21,11 @@ CPAN::Mini::Inject::Remote - Inject into your CPAN mirror from over here
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 
 =head1 SYNOPSIS
@@ -88,11 +89,11 @@ sub _initialize {
 	croak "Supplied config file is not readable";
     }
 
-    my $config = LoadFile($args{config_file});
+    $self->{config} = LoadFile($args{config_file});
 
     if (not $args{remote_server})
     {
-	$self->{remote_server} = $config->{remote_server};
+	$self->{remote_server} = $self->{config}{remote_server};
     }
     else
     {
@@ -101,25 +102,6 @@ sub _initialize {
 
     # get rid of any trailing slash as it will break things
     $self->{remote_server} =~ s/\/$//;
-
-    my @ssl_opt = qw/SSL_ca_file SSL_cert_file SSL_key_file verify_hostnames/;
-    for (@ssl_opt)
-    {
-        next unless my $c = $config->{$_};
-        if ($c =~ s/^\s*#!//)
-        {
-            my $output = eval { `$c` };
-            $self->{ssl_opts}{$_} = $output if $? == 0;
-        }
-        elsif ($c =~ /^~/)
-        {
-            $self->{ssl_opts}{$_} = (glob $c)[0];
-        }
-        else
-        {
-            $self->{ssl_opts}{$_} = $c;
-        }
-    }
 
 } # end of method _initialize
 
@@ -195,9 +177,15 @@ sub _useragent {
     {
         $self->{useragent} = LWP::UserAgent->new;
 
-        if ($self->{remote_server} =~ /^https:/ && $self->{ssl_opts})
+        if ($self->{remote_server} =~ /^https:/)
         {
-            $self->{useragent}->ssl_opts(%{$self->{ssl_opts}});
+            my $default = 'CPAN::Mini::Inject::Remote::ssl_opts';
+            my $class = blessed $self->{config} || $default;
+            eval "require $class";
+            unless ($@) {
+                my $opts = $class->new($self->{config});
+                $self->{useragent}->ssl_opts($opts->ssl_opts);
+            }
         }
     }
 
@@ -318,10 +306,10 @@ sub inject {
 
 the sample configuration file ~/.mcpani_remote over SSL:
 
+ --- !!perl/hash:CPAN::Mini::Inject::Remote::ssl_opts
  remote_server: https://mcpani.your.org
  SSL_cert_file: ~/.certs/your.crt
  SSL_key_file: ~/.certs/your.key
- SSL_ca_file: #!perl -MCACertOrg::CA -e 'print CACertOrg::CA::SSL_ca_file()'
 
 
 you want to export your.crt and your.key from your.p12:

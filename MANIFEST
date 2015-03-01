@@ -3,6 +3,7 @@ Build.PL
 Changes
 ignore.txt
 lib/CPAN/Mini/Inject/Remote.pm
+lib/CPAN/Mini/Inject/Remote/ssl_opts.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
