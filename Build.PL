@@ -22,6 +22,7 @@ my $builder = Module::Build->new(
         'HTTP::Request' => 0,
         'HTTP::Request::Common' => 0,
         'Dist::Metadata' => 0,
+        'CACert::CA' => 0,
     },
     add_to_cleanup      => [ 'CPAN-Mini-Inject-Remote-*' ],
     create_makefile_pl => 'traditional',

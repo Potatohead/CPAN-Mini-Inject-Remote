@@ -27,10 +27,10 @@ our @OPT = qw/SSL_ca_file
 
 sub ssl_opts {
     my $self = shift;
-    map { ($_ => defined $self->{$_}?
-             /file/? (glob $self->{$_})[0] : $self->{$_} :
-             $self->$_ )
-    } @OPT;
+    map { ( defined $self->{$_} ?
+              ($_ => /file/ ? (glob $self->{$_})[0] : $self->{$_}) :
+              $self->can($_) ? ($_ => $self->$_): ()
+             ) } @OPT;
 }
 
 
