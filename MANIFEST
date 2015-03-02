@@ -13,4 +13,4 @@ t/00-load.t
 t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
-META.json
+t/ssl_opts.t

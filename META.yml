@@ -21,6 +21,7 @@ provides:
     file: lib/CPAN/Mini/Inject/Remote/ssl_opts.pm
     version: '0.05'
 requires:
+  CACertOrg::CA: '0'
   Dist::Metadata: '0'
   File::Spec: '0'
   Getopt::Long: '0'

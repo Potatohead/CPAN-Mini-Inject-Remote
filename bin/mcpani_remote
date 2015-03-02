@@ -132,9 +132,11 @@ if (not (grep $options{action}->{$_}, qw/add update inject/)
     my $inject;
     for (@ARGV)
     {
-        if (my $d = Dist::Metadata->new(file => $_)) {
+        if (my $d = Dist::Metadata->new(file => $_))
+        {
             my $p = $d->package_versions;
-            if (my ($module) = sort { length $a <=> length $b } keys %{$p}) {
+            if (my ($module) = sort { length $a <=> length $b } keys %{$p})
+            {
                 $options{add}->{authorid} or warn "$0: authorid DUMMY\n";
                 my @mcpani = (
                     $0, '--add', '--file', $_,
@@ -145,7 +147,7 @@ if (not (grep $options{action}->{$_}, qw/add update inject/)
                 exit 1 unless (system @mcpani) == 0;
                 $inject++;
             }
-	}
+        }
     }
     $options{action}->{inject} = $inject;
 }

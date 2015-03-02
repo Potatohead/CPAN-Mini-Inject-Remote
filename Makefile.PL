@@ -5,6 +5,7 @@ WriteMakefile
   'NAME' => 'CPAN::Mini::Inject::Remote',
   'VERSION_FROM' => 'lib/CPAN/Mini/Inject/Remote.pm',
   'PREREQ_PM' => {
+                   'CACertOrg::CA' => 0,
                    'Dist::Metadata' => 0,
                    'File::Spec' => 0,
                    'Getopt::Long' => 0,

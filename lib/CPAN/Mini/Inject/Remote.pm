@@ -82,18 +82,18 @@ sub _initialize {
 
     if (not $args{config_file})
     {
-	$args{config_file} = $self->_find_config();
+        $args{config_file} = $self->_find_config();
     }
     elsif (not -r $args{config_file})
     {
-	croak "Supplied config file is not readable";
+        croak "Supplied config file is not readable";
     }
 
     $self->{config} = LoadFile($args{config_file});
 
     if (not $args{remote_server})
     {
-	$self->{remote_server} = $self->{config}{remote_server};
+        $self->{remote_server} = $self->{config}{remote_server};
     }
     else
     {
@@ -238,7 +238,6 @@ sub add {
 
     if (not $response->is_success())
     {
-        #croak 'Add failed. ' . Dumper($response);
         warn 'Add failed. ' . $response->status_line . "\n";
     }
 

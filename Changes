@@ -1,8 +1,11 @@
 Revision history for CPAN-Mini-Inject-Remote
 
-0.04	2014-12-08/08:00
+0.05    2015-03-02/22:30
+        rewrites ssl_opts uinsg !perl/object in ~/.mcpani_remote
+	uses Dist::Metadata to get -module and -modversion
+0.04    2014-12-08/08:00
         adds checking HTTP::Response and exit 1 if not success
-0.03	2014-12-06/19:00
+0.03    2014-12-06/19:00
         adds ssl_opts
         guesses -module and -modversion from the file
 0.02    2010-02-08/11:44
