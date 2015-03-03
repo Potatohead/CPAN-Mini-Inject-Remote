@@ -135,7 +135,8 @@ if (not (grep $options{action}->{$_}, qw/add update inject/)
         if (my $d = Dist::Metadata->new(file => $_))
         {
             my $p = $d->package_versions;
-            if (my ($module) = sort { length $a <=> length $b } keys %{$p})
+            if (my ($module) = sort { length $a <=> length $b }
+                  grep $p->{$_}, keys %{$p})
             {
                 $options{add}->{authorid} or warn "$0: authorid DUMMY\n";
                 my @mcpani = (
