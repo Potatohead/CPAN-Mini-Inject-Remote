@@ -2,3 +2,16 @@
 ^\.git
 \.bak$
 ^META\.json$
+\.old$
+\.tar\.gz$
+^Build$
+^MY/
+^MYMETA\.*
+^Makefile$
+^_build/
+^blib/
+^files/
+^pm_to_blib$
+~$
+^\#
+^\.\#

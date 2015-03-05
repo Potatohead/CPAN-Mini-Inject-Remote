@@ -5,8 +5,7 @@ WriteMakefile
   'NAME' => 'CPAN::Mini::Inject::Remote',
   'VERSION_FROM' => 'lib/CPAN/Mini/Inject/Remote.pm',
   'PREREQ_PM' => {
-                   'Archive::Tar' => 0,
-                   'CPAN::Meta' => 0,
+                   'Dist::Metadata' => 0,
                    'File::Spec' => 0,
                    'Getopt::Long' => 0,
                    'HTTP::Request' => 0,

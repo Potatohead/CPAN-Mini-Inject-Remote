@@ -89,11 +89,11 @@ perform its functionality
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Carp;
 use Getopt::Long;
@@ -122,28 +122,15 @@ GetOptions(
 pod2usage(1) if $help;
 pod2usage(-exitstatus => 0, -verbose => 2) if $man;
 
-use Archive::Tar;
-use CPAN::Meta;
+use Dist::Metadata;
 
 sub get_name_version {
     my $file = shift;
-    (my $tar = Archive::Tar->new) or die "can't new Archive::Tar";
-    if ($tar->read($file, { filter => qr/META/ }))
-    {
-	my @list = $tar->list_files([qw(name)]);
-	for (grep /META/, @list)
-	{
-	    next unless my $string = $tar->get_content($_);
-	    print $string if $verbose > 1;
-	    next unless my $meta = CPAN::Meta->load_string($string);
-	    (my $scan_version = $meta->version) .= '(?:_\d+)?';
-	    my ($modversion) = $file =~ /($scan_version)/;
-	    (my $scan_name = $meta->name) =~ s{-}{[/-]}g;
-	    my ($modname) = map { /\b($scan_name)(\.\w+)?$/? $1 : () } @list;
-	    $modname =~ s/\//::/g;
-	    return ($modname, $modversion) if $modname && $modversion;
-	}
-    }
+    return () unless my $d = Dist::Metadata->new(file => $file);
+    my $p = $d->package_versions;
+    (my $module = $d->name) =~ s/-/::/g;
+    my $modversion = $p->{$module} || $d->version;
+    ($module, $modversion);
 }
 
 if (not (grep $options{action}->{$_}, qw/add update inject/)
