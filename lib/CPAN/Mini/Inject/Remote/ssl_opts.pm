@@ -30,7 +30,8 @@ see $ua->ssl_opts() in L<LWP::UserAgent>
     no strict 'refs';
     for my $name (@OPTS) {
         *$name = $name =~ /file/ ?
-          sub { glob $_[0]->{$name} } : sub { $_[0]->{$name} };
+          sub { $_[0]->{$name} && (glob $_[0]->{$name})[0] } :
+          sub { $_[0]->{$name} };
     }
 }
 
@@ -42,7 +43,7 @@ set of SSL options aboves
 
 sub ssl_opts {
     my $self = shift;
-    map { $_ ? ($_ => $self->$_) : () } @OPTS;
+    map { ($_ => $self->$_) } @OPTS;
 }
 
 =item new

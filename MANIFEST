@@ -6,7 +6,7 @@ ignore.txt
 lib/CPAN/Mini/Inject/Remote.pm
 lib/CPAN/Mini/Inject/Remote/ssl_opts.pm
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
 README
@@ -15,3 +15,4 @@ t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
 t/ssl_opts.t
+t/ssl_opts2.t

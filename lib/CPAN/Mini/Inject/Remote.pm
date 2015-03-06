@@ -183,8 +183,8 @@ sub _useragent {
             my $class = blessed $self->{config} || $default;
             eval "require $class";
             croak $@ if $@;
-            my $opts = $class->new($self->{config});
-            $self->{useragent}->ssl_opts($opts->ssl_opts);
+            $self->{useragent}->ssl_opts($class->new($self->{config})->ssl_opts)
+              if $class->can('new');
         }
     }
 

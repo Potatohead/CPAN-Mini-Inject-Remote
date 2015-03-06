@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More; # tests => 11;
+use Test::More tests => 11;
 use YAML::Any qw(Load);
 
 BEGIN { use_ok( 'CPAN::Mini::Inject::Remote::ssl_opts' ) }
@@ -26,12 +26,18 @@ END
 
 SKIP: {
     local $ENV{MCPANI_REMOTE_CONFIG} = 'MY/ssl_opts.yml';
-    skip 'MY/ssl_opts', 4 unless -f $ENV{MCPANI_REMOTE_CONFIG};
+    skip 'MY/ssl_opts', 3 unless -f $ENV{MCPANI_REMOTE_CONFIG};
     local @INC = (@INC, '.');
     my $mcpan = CPAN::Mini::Inject::Remote->new();
+    is ref $mcpan->{config}, 'HASH', 'odd yaml';
     my $ua = $mcpan->_useragent();
-    my %ssl_opts = %{$ua->{ssl_opts}};
-    ok exists $ssl_opts{$_}, $_ or diag explain \%ssl_opts for @ssl_opts ;
+    ok !$ua->{ssl_opts}{SSL_ca_file}, 'no default ca_file'
+      or diag explain $ua->{ssl_opts};
+    my $mcpan2 = CPAN::Mini::Inject::Remote->new();
+    $mcpan2->{config}{SSL_ca_file} = 'path/to/root.crt';
+    my $ua2 = $mcpan2->_useragent();
+    ok $ua2->{ssl_opts}{SSL_ca_file}, 'ca_file'
+      or diag explain $ua2->{ssl_opts};
 }
 
-done_testing;
+# done_testing;

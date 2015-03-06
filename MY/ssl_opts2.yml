@@ -1,3 +1,4 @@
+--- !!perl/hash:MY::ssl_opts
 remote_server: https://mcpani.our.org
 SSL_cert_file: ~/.certs/my.crt
 SSL_key_file: ~/.certs/my.key
