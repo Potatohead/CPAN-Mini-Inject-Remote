@@ -181,8 +181,8 @@ sub _useragent {
         {
             my $default = 'CPAN::Mini::Inject::Remote::ssl_opts';
             my $class = blessed $self->{config} || $default;
-            eval "require $class";
-            croak $@ if $@;
+            my $pm = (File::Spec->catdir(split(/::/, $class))) . '.pm';
+            require $pm or croak "can't locate $pm";
             $self->{useragent}->ssl_opts($class->new($self->{config})->ssl_opts)
               if $class->can('new');
         }
