@@ -2,12 +2,13 @@
 
 use strict;
 use warnings;
-use Test::More; # tests => 7;
+use Test::More;
 
 eval "use CACertOrg::CA";
 plan skip_all => "CACertOrg::CA" if $@;
+plan tests => 6;
 
-BEGIN { use_ok( 'CPAN::Mini::Inject::Remote' ) }
+use CPAN::Mini::Inject::Remote;
 
 my @ssl_opts = (qw/SSL_ca_file SSL_cert_file SSL_key_file verify_hostnames/);
 
@@ -44,7 +45,7 @@ SKIP: {
       or diag explain $mcpan->{config};
     $mcpan->{config}{SSL_ca_file} = 'path/to/root.crt';
     eval { $mcpan->_useragent };
-    ok $@, 'cant locate';
+    like $@, qr/can't locate/i, 'cant locate' or diag $@;
 }
 
-done_testing;
+# done_testing;
