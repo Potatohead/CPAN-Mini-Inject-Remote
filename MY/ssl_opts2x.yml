@@ -1,0 +1,5 @@
+--- !!perl/hash:MY::cant_locate
+remote_server: https://mcpani.our.org
+SSL_cert_file: ~/.certs/my.crt
+SSL_key_file: ~/.certs/my.key
+verify_hostnames: true

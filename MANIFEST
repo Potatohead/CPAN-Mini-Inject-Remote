@@ -1,10 +1,12 @@
 bin/mcpani_remote
+bin/mcpani_remote.pl
 Build.PL
 Changes
 ignore.txt
 lib/CPAN/Mini/Inject/Remote.pm
+lib/CPAN/Mini/Inject/Remote/ssl_opts.pm
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
 README
@@ -12,4 +14,6 @@ t/00-load.t
 t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
+t/ssl_opts.t
+t/ssl_opts2.t
 META.json

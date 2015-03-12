@@ -13,6 +13,7 @@ use HTTP::Request;
 use HTTP::Request::Common;
 use Data::Dumper;
 use Carp;
+use Scalar::Util qw/blessed/;
 
 =head1 NAME
 
@@ -20,11 +21,11 @@ CPAN::Mini::Inject::Remote - Inject into your CPAN mirror from over here
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 
 =head1 SYNOPSIS
@@ -81,18 +82,18 @@ sub _initialize {
 
     if (not $args{config_file})
     {
-	$args{config_file} = $self->_find_config();
+        $args{config_file} = $self->_find_config();
     }
     elsif (not -r $args{config_file})
     {
-	croak "Supplied config file is not readable";
+        croak "Supplied config file is not readable";
     }
 
-    my $config = LoadFile($args{config_file});
+    my $c = $self->{config} = LoadFile($args{config_file});
 
     if (not $args{remote_server})
     {
-	$self->{remote_server} = $config->{remote_server};
+        $self->{remote_server} = $c->{remote_server};
     }
     else
     {
@@ -102,23 +103,12 @@ sub _initialize {
     # get rid of any trailing slash as it will break things
     $self->{remote_server} =~ s/\/$//;
 
-    my @ssl_opt = qw/SSL_ca_file SSL_cert_file SSL_key_file verify_hostnames/;
-    for (@ssl_opt)
+    if ($self->{remote_server} =~ /https:/)
     {
-        next unless my $c = $config->{$_};
-        if ($c =~ s/^\s*#!//)
-        {
-            my $output = eval { `$c` };
-            $self->{ssl_opts}{$_} = $output if $? == 0;
-        }
-        elsif ($c =~ /^~/)
-        {
-            $self->{ssl_opts}{$_} = (glob $c)[0];
-        }
-        else
-        {
-            $self->{ssl_opts}{$_} = $c;
-        }
+        bless $c, 'CPAN::Mini::Inject::Remote::ssl_opts' unless blessed $c;
+        require File::Spec->catdir(split /::/, blessed $c) . '.pm';
+        $self->{useragent_opts}{ssl_opts} = { $c->ssl_opts }
+          if $c->can('ssl_opts');
     }
 
 } # end of method _initialize
@@ -193,12 +183,9 @@ sub _useragent {
 
     if (not $self->{useragent})
     {
-        $self->{useragent} = LWP::UserAgent->new;
-
-        if ($self->{remote_server} =~ /^https:/ && $self->{ssl_opts})
-        {
-            $self->{useragent}->ssl_opts(%{$self->{ssl_opts}});
-        }
+        $self->{useragent} = LWP::UserAgent->new(
+            %{ $self->{useragent_opts} || {} },
+           );
     }
 
     return $self->{useragent};
@@ -250,7 +237,6 @@ sub add {
 
     if (not $response->is_success())
     {
-        #croak 'Add failed. ' . Dumper($response);
         warn 'Add failed. ' . $response->status_line . "\n";
     }
 
@@ -278,7 +264,6 @@ sub update {
 
     if (not $response->is_success())
     {
-        #croak 'Update failed. ' . Dumper($response);
         warn 'Update failed. ' . $response->status_line . "\n";
     }
 
@@ -306,7 +291,6 @@ sub inject {
 
     if (not $response->is_success())
     {
-        #croak 'Inject failed. ' . Dumper($response);
         warn 'Inject failed. ' . $response->status_line . "\n";
     }
 
@@ -321,8 +305,7 @@ the sample configuration file ~/.mcpani_remote over SSL:
  remote_server: https://mcpani.your.org
  SSL_cert_file: ~/.certs/your.crt
  SSL_key_file: ~/.certs/your.key
- SSL_ca_file: #!perl -MCACertOrg::CA -e 'print CACertOrg::CA::SSL_ca_file()'
-
+ SSL_ca_file: path/to/root.crt
 
 you want to export your.crt and your.key from your.p12:
 
@@ -333,6 +316,7 @@ you want to export your.crt and your.key from your.p12:
  Enter Import Password: ******
  MAC verified OK
 
+see L<CACertOrg::CA> if you can not remember path/to/root.crt.
 
 =head1 AUTHOR
 
