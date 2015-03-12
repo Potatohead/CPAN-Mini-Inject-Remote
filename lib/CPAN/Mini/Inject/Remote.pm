@@ -89,11 +89,11 @@ sub _initialize {
         croak "Supplied config file is not readable";
     }
 
-    $self->{config} = LoadFile($args{config_file});
+    my $c = $self->{config} = LoadFile($args{config_file});
 
     if (not $args{remote_server})
     {
-        $self->{remote_server} = $self->{config}{remote_server};
+        $self->{remote_server} = $c->{remote_server};
     }
     else
     {
@@ -102,6 +102,14 @@ sub _initialize {
 
     # get rid of any trailing slash as it will break things
     $self->{remote_server} =~ s/\/$//;
+
+    if ($self->{remote_server} =~ /https:/)
+    {
+        bless $c, 'CPAN::Mini::Inject::Remote::ssl_opts' unless blessed $c;
+        require File::Spec->catdir(split /::/, blessed $c) . '.pm';
+        $self->{useragent_opts}{ssl_opts} = { $c->ssl_opts }
+          if $c->can('ssl_opts');
+    }
 
 } # end of method _initialize
 
@@ -175,17 +183,9 @@ sub _useragent {
 
     if (not $self->{useragent})
     {
-        $self->{useragent} = LWP::UserAgent->new;
-
-        if ($self->{remote_server} =~ /^https:/)
-        {
-            my $default = 'CPAN::Mini::Inject::Remote::ssl_opts';
-            my $class = blessed $self->{config} || $default;
-            my $pm = (File::Spec->catdir(split(/::/, $class))) . '.pm';
-            require $pm or croak "can't locate $pm";
-            $self->{useragent}->ssl_opts($class->new($self->{config})->ssl_opts)
-              if $class->can('new');
-        }
+        $self->{useragent} = LWP::UserAgent->new(
+            %{ $self->{useragent_opts} || {} },
+           );
     }
 
     return $self->{useragent};
@@ -264,7 +264,6 @@ sub update {
 
     if (not $response->is_success())
     {
-        #croak 'Update failed. ' . Dumper($response);
         warn 'Update failed. ' . $response->status_line . "\n";
     }
 
@@ -292,7 +291,6 @@ sub inject {
 
     if (not $response->is_success())
     {
-        #croak 'Inject failed. ' . Dumper($response);
         warn 'Inject failed. ' . $response->status_line . "\n";
     }
 

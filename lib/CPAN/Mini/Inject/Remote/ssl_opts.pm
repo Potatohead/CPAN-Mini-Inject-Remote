@@ -46,18 +46,6 @@ sub ssl_opts {
     map { ($_ => $self->$_) } @OPTS;
 }
 
-=item new
-
-constructor
-
-=cut
-
-sub new {
-    my $proto = shift;
-    my $class = ref($proto) || $proto;
-    bless $_[0], $class;
-}
-
 1;
 
 =back

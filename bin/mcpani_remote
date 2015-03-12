@@ -145,9 +145,9 @@ if (not (grep $options{action}->{$_}, qw/add update inject/)
 	{
 	    $options{add}->{authorid} or warn "$0: authorid DUMMY\n";
 	    my @mcpani = (
-		$0, '-add', '-file', $_,
-		'-module', $modname, '-modversion', $modversion,
-		'-author', $options{add}->{authorid} || 'DUMMY',
+		$0, '--add', '--file', $_,
+		'--module', $modname, '--modversion', $modversion,
+		'--authorid', $options{add}->{authorid} || 'DUMMY',
 		);
 	    warn "@mcpani\n" if $verbose;
 	    exit 1 unless (system @mcpani) == 0;
